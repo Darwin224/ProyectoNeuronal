@@ -5,17 +5,17 @@ class RedNeuronal:
     def __init__(self, architecture):
         self.architecture = architecture
         self.weights = []
-        self.biases = []
+        self.biases = [] #sesgos
         self.training_history = []
         
         # Validación: la primera capa debe ser de tipo 'input'
         if architecture[0][1] != 'input':
             raise ValueError("La primera capa debe tener tipo 'input'.")
         
-        # Inicialización de pesos y sesgos
+        # Inicialización de pesos y biases
         for i in range(len(architecture) - 1):
-            input_dim = architecture[i][0]
-            output_dim = architecture[i + 1][0]
+            input_dim = architecture[i][0] #neu actual
+            output_dim = architecture[i + 1][0]#siguiente
             w = np.random.randn(input_dim, output_dim) * np.sqrt(2. / input_dim)  # He para ReLU
             b = np.zeros((1, output_dim))
             self.weights.append(w)
@@ -110,15 +110,18 @@ class RedNeuronal:
             if verbose and (epoch % 10 == 0 or epoch == 1):
                 print(f"Epoch {epoch}/{epochs} - Loss: {epoch_loss:.4f} - Accuracy: {epoch_accuracy:.4f}")
 
+    #Calcula la función de pérdida de entropía cruzada entre las predicciones pred y las etiquetas reales
     def _cross_entropy(self, pred, label):
         epsilon = 1e-12
         pred = np.clip(pred, epsilon, 1. - epsilon)
         return -np.mean(np.sum(label * np.log(pred), axis=1))
 
+    #Realiza predicciones con la red neuronal para las entradas 
     def predict(self, X):
         activations, _ = self._forward(X)
         return activations[-1]
 
+    #Evalúa el modelo calculando la pérdida y la precisión sobre un conjunto de datos dado.
     def evaluate(self, X, y):
         predictions = self.predict(X)
         loss = self._cross_entropy(predictions, y)
@@ -126,8 +129,9 @@ class RedNeuronal:
         true_labels = np.argmax(y, axis=1)
         accuracy = np.mean(pred_labels == true_labels)
         return loss, accuracy
+        
     def load_model(self, filename):
-        """🔥 MÉTODO AÑADIDO - Cargar un modelo previamente guardado"""
+        """Cargar un modelo previamente guardado"""
         try:
             with open(filename, 'r') as f:
                 model_data = json.load(f)
@@ -142,15 +146,15 @@ class RedNeuronal:
             # Inicializar historial vacío
             self.training_history = []
             
-            print(f"✅ Modelo cargado desde: {filename}")
-            print(f"📊 Arquitectura: {len(self.architecture)} capas")
+            print(f"Modelo cargado desde: {filename}")
+            print(f" Arquitectura: {len(self.architecture)} capas")
             
         except FileNotFoundError:
-            raise FileNotFoundError(f"❌ No se encontró el archivo: {filename}")
+            raise FileNotFoundError(f"No se encontró el archivo: {filename}")
         except KeyError as e:
-            raise KeyError(f"❌ Formato de archivo inválido. Falta clave: {e}")
+            raise KeyError(f"Formato de archivo inválido. Falta clave: {e}")
         except Exception as e:
-            raise Exception(f"❌ Error cargando modelo: {e}")
+            raise Exception(f"Error cargando modelo: {e}")
 
     def save_model(self, filename):
         """Guardar el modelo entrenado"""
@@ -161,7 +165,7 @@ class RedNeuronal:
         }
         with open(filename, 'w') as f:
             json.dump(model_data, f, indent=2)
-        print(f"✅ Modelo guardado en: {filename}")
+        print(f"Modelo guardado en: {filename}")
 
     
 
